@@ -2,32 +2,49 @@ import { SingleBoard, SingleBoardProps } from "./single-board";
 
 const boards: SingleBoardProps[] = [
   {
-    name: "Not Started",
+    name: "Backlog",
+    createdAt: new Date(),
+    tasks: [
+      "Deploiement",
+      "User feed Service",
+      "Search Service",
+      "Data broker (Apache Kafka)",
+    ],
+  },
+  {
+    name: "Planning",
     createdAt: new Date(),
     tasks: [],
+    color: "blue",
   },
   {
     name: "In Progress",
     createdAt: new Date(),
-    tasks: [],
+    tasks: ["Dashboard", "API Gateway", "Core Backend"],
     color: "yellow",
   },
   {
-    name: "To Fix",
+    name: "Paused",
     createdAt: new Date(),
-    tasks: [],
+    tasks: ["Mobile"],
     color: "purple",
   },
   {
-    name: "Finished",
+    name: "Done",
     createdAt: new Date(),
     tasks: [],
     color: "green",
   },
+  {
+    name: "Canceled",
+    createdAt: new Date(),
+    tasks: [],
+    color: "red",
+  },
 ];
 export function ProjectBoard() {
   return (
-    <div className="h-full rounded-2xl flex items-center gap-2 mt-4 p-3 overflow-x-scroll w-full">
+    <div className="rounded-2xl flex  gap-2 mt-4  overflow-x-scroll no-scrollbar">
       {boards.map((board) => {
         return <SingleBoard board={board} />;
       })}
