@@ -4,12 +4,7 @@ const boards: SingleBoardProps[] = [
   {
     name: "Backlog",
     createdAt: new Date(),
-    tasks: [
-      "Deploiement",
-      "User feed Service",
-      "Search Service",
-      "Data broker (Apache Kafka)",
-    ],
+    tasks: [],
   },
   {
     name: "Planning",
@@ -20,13 +15,13 @@ const boards: SingleBoardProps[] = [
   {
     name: "In Progress",
     createdAt: new Date(),
-    tasks: ["Dashboard", "API Gateway", "Core Backend"],
+    tasks: [],
     color: "yellow",
   },
   {
     name: "Paused",
     createdAt: new Date(),
-    tasks: ["Mobile"],
+    tasks: [],
     color: "purple",
   },
   {

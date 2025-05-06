@@ -1,6 +1,13 @@
+// single-board.tsx
+// Mise à jour pour rendre chaque colonne droppable et accueillir des tâches draggable
+
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Ellipsis, Plus } from "lucide-react";
-import { Task } from "./single-task";
+import {  SortableTask } from "./single-task";
+import { useDroppable } from "@dnd-kit/core";
+import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
+import { ITask } from "@/types/kanban";
 
 export const KANBAN_VARIANT = {
   blue: {
@@ -42,64 +49,67 @@ export const KANBAN_VARIANT = {
 } as const;
 export interface SingleBoardProps {
   name: string;
-  createdAt: Date;
   color?: keyof typeof KANBAN_VARIANT;
-  tasks: string[];
+  createdAt: Date;
+  tasks: ITask[];
 }
 
-// Map des variantes de couleur
-
 export function SingleBoard({ board }: { board: SingleBoardProps }) {
-  const { name, createdAt, tasks, color = "gray" } = board;
+  const { name, tasks, color = "gray" } = board;
+  const variantClass = KANBAN_VARIANT[color] ?? KANBAN_VARIANT.gray;
 
-  const tasksNumber = tasks.length;
-  const variantClass = KANBAN_VARIANT[color] ?? KANBAN_VARIANT["gray"];
+  // Définir la zone droppable pour les tâches de cette colonne
+  const { setNodeRef: setDroppableRef } = useDroppable({ id: name });
 
   return (
     <div
-      className={`min-w-[270px] h-fit  p-1 rounded-xl flex flex-col gap-3 ${variantClass.bg} cursor-grab`}
+      className={`min-w-[270px] p-1 rounded-xl flex flex-col gap-3 ${variantClass.bg} cursor-grab`}
     >
-      <div className="flex justify-between rounded-lg items-center">
+      {/* En-tête */}
+      <div className="flex justify-between items-center px-3">
         <div
-          className={`flex items-center ${variantClass.cover} rounded-xl px-3 flex gap-1 items-start `}
+          className={`flex items-center ${variantClass.cover} rounded-xl px-2 py-1 gap-1`}
         >
-          <span
-            className={`w-2 h-2 rounded-full bg-inherit ${variantClass.dot}`}
-          ></span>
-          <h1 className={`font-semibold text-sm ${variantClass.text}`}>
+          <span className={`w-2 h-2 rounded-full ${variantClass.dot}`}></span>
+          <h2 className={`font-semibold text-sm ${variantClass.text}`}>
             {name}
-          </h1>
+          </h2>
         </div>
-        <div className="flex items-center gap-1 text-gray-500 text-sm ">
-          <Button variant={"ghost"} size={"icon"} className="h-6 w-6">
-            <Ellipsis size={15} className={variantClass.text} />
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon">
+            <Ellipsis className={variantClass.text} />
           </Button>
-          <Button variant={"ghost"} size={"icon"} className="h-6 w-6">
-            <Plus size={15} className={variantClass.text} />
+          <Button variant="ghost" size="icon">
+            <Plus className={variantClass.text} />
           </Button>
         </div>
       </div>
-      <main className="flex flex-col gap-2 px-1">
-        {tasks.map((value) => (
-          <Task
-            task={{
-              label: value,
-              duration: 0,
-              color: color,
-              projectName: name,
-            }}
-          />
-        ))}
 
-        <div className="p-1 w-full">
+      {/* Liste des tâches droppable + sortable */}
+      <div
+        ref={setDroppableRef}
+        className="flex flex-col gap-2 px-1"
+        data-testid={`droppable-${name}`}
+      >
+        <SortableContext
+          items={tasks.map((t) => t.id!)}
+          strategy={rectSortingStrategy}
+        >
+          {tasks.map((task) => (
+            <SortableTask key={task.id} task={task} />
+          ))}
+        </SortableContext>
+      </div>
+
+      {/* Bouton nouvelle tâche */}
+      <div className="p-1 w-full">
           <Button
-            className={`w-full text-left  ${variantClass.bg} ${variantClass.text} shadow-none border hover:${variantClass.text} hover:bg-gray-100 rounded-lg  `}
+            className={`w-full text-left  ${variantClass.bg} ${variantClass.text} shadow-none border hover:${variantClass.text} hover:bg-gray-100 rounded-lg ` }
           >
             <Plus />
             New project
           </Button>
         </div>
-      </main>
     </div>
   );
 }
