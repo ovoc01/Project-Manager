@@ -1,6 +1,4 @@
-// store.ts
-// Zustand store pour gérer globalement les boards et les tâches en utilisant les interfaces définies
-
+// store.ts - Updated Zustand store with improved task movement logic
 import { Board, ITask } from "@/types/kanban";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
@@ -14,6 +12,8 @@ interface KanbanState {
     moveTask: (taskId: string, fromBoard: string, toBoard: string) => void;
     // action pour ajouter une tâche
     addTask: (boardName: string, task: ITask) => void;
+    // action pour mettre à jour une tâche
+    updateTask: (updatedTask: ITask, boardName: string) => void;
 }
 
 // Création du store avec middleware devtools
@@ -38,17 +38,37 @@ export const useKanbanStore = create<KanbanState>()(
                 return { boards: b };
             }, false, "reorderBoards"),
 
-        // Déplacer une tâche entre colonnes
+        // Déplacer une tâche entre colonnes - version améliorée
         moveTask: (taskId, fromBoard, toBoard) =>
             set((state) => {
-                const boardsCopy: Board[] = state.boards.map((b) => ({ ...b, tasks: [...b.tasks] }));
-                const source = boardsCopy.find((b) => b.name === fromBoard);
-                const target = boardsCopy.find((b) => b.name === toBoard);
-                if (!source || !target) return state;
-                const idx = source.tasks.findIndex((t) => t.id === taskId);
-                if (idx === -1) return state;
-                const [task] = source.tasks.splice(idx, 1);
-                target.tasks.push(task);
+                // Si même board, ne rien faire
+                if (fromBoard === toBoard) return state;
+                
+                const boardsCopy: Board[] = JSON.parse(JSON.stringify(state.boards));
+                
+                const sourceIndex = boardsCopy.findIndex((b) => b.name === fromBoard);
+                const targetIndex = boardsCopy.findIndex((b) => b.name === toBoard);
+                
+                if (sourceIndex === -1 || targetIndex === -1) return state;
+                
+                const source = boardsCopy[sourceIndex];
+                const target = boardsCopy[targetIndex];
+                
+                // Trouver l'index de la tâche à déplacer
+                const taskIndex = source.tasks.findIndex((t) => t.id === taskId);
+                if (taskIndex === -1) return state;
+                
+                // Copier la tâche et ajuster son projectName pour correspondre au board cible
+                const taskToMove = {...source.tasks[taskIndex]};
+                taskToMove.projectName = toBoard;
+                taskToMove.color = boardsCopy[targetIndex].color;
+                
+                // Retirer la tâche du board source
+                source.tasks.splice(taskIndex, 1);
+                
+                // Ajouter la tâche au board cible
+                target.tasks.push(taskToMove);
+                
                 return { boards: boardsCopy };
             }, false, "moveTask"),
 
@@ -59,5 +79,20 @@ export const useKanbanStore = create<KanbanState>()(
                     b.name === boardName ? { ...b, tasks: [...b.tasks, task] } : b
                 ),
             }), false, "addTask"),
-    }))
+            
+        // Mettre à jour une tâche existante
+        updateTask: (updatedTask, boardName) =>
+            set((state) => ({
+                boards: state.boards.map((b) =>
+                    b.name === boardName
+                        ? {
+                            ...b,
+                            tasks: b.tasks.map((t) =>
+                                t.id === updatedTask.id ? updatedTask : t
+                            ),
+                        }
+                        : b
+                ),
+            }), false, "updateTask"),
+    })),
 );

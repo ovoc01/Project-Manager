@@ -6,6 +6,8 @@ export interface ITask {
     label: string;
     color?: keyof typeof KANBAN_VARIANT;
     projectName?: string;
+    isEdited?: boolean;
+    
 }
 export interface Board {
     name: string;

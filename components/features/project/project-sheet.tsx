@@ -17,21 +17,14 @@ import {
   ArrowUpRight,
   AtSign,
   Calendar,
-  Check,
   CheckCheck,
   ChevronDownCircle,
   Clock10,
-  Loader2,
-  LoaderCircle,
-  LoaderPinwheel,
   MousePointer2,
   Paperclip,
   Plus,
   Send,
-  Signal,
-  TextCursor,
   Users,
-  Users2,
 } from "lucide-react";
 
 export function ProjectSheet() {
@@ -45,7 +38,7 @@ export function ProjectSheet() {
           <SheetTitle className="text-3xl text-gray-300 font-bold">
             <div>
               <Input
-                className="placeholder:text-gray-300 placeholder:text-3xl border-none placeholder:font-bold shadow-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus:ring-0 focus:outline-none "
+                className="placeholder:text-gray-300 text-black placeholder:text-3xl border-none placeholder:font-bold shadow-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus:ring-0 focus:outline-none "
                 placeholder="New Project"
                 style={{
                   caretColor: "black",
