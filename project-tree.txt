@@ -1,0 +1,97 @@
+.
+├── app
+│   ├── favicon.ico
+│   ├── fonts
+│   │   ├── GeistMonoVF.woff
+│   │   └── GeistVF.woff
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── page.tsx
+├── bun.lock
+├── components
+│   ├── features
+│   │   ├── logo.tsx
+│   │   ├── navbar.tsx
+│   │   └── project
+│   │       ├── area.tsx
+│   │       ├── kanban-board.tsx
+│   │       ├── project-board.tsx
+│   │       ├── project-header.tsx
+│   │       ├── project-sheet.tsx
+│   │       ├── single-board.tsx
+│   │       └── single-task.tsx
+│   ├── mode-toggle.tsx
+│   ├── theme-provider.tsx
+│   └── ui
+│       ├── avatar.tsx
+│       ├── button.tsx
+│       ├── calendar.tsx
+│       ├── dropdown-menu.tsx
+│       ├── input.tsx
+│       ├── kanban-badge.tsx
+│       ├── label.tsx
+│       ├── popover.tsx
+│       ├── separator.tsx
+│       ├── sheet.tsx
+│       └── textarea.tsx
+├── components.json
+├── constants
+│   └── colors.ts
+├── hooks
+│   └── use-hover.ts
+├── lib
+│   ├── api.ts
+│   ├── generated
+│   │   └── prisma
+│   │       ├── client.d.ts
+│   │       ├── client.js
+│   │       ├── default.d.ts
+│   │       ├── default.js
+│   │       ├── edge.d.ts
+│   │       ├── edge.js
+│   │       ├── index-browser.js
+│   │       ├── index.d.ts
+│   │       ├── index.js
+│   │       ├── libquery_engine-darwin-arm64.dylib.node
+│   │       ├── package.json
+│   │       ├── runtime
+│   │       │   ├── edge-esm.js
+│   │       │   ├── edge.js
+│   │       │   ├── index-browser.d.ts
+│   │       │   ├── index-browser.js
+│   │       │   ├── library.d.ts
+│   │       │   ├── library.js
+│   │       │   ├── react-native.js
+│   │       │   └── wasm.js
+│   │       ├── schema.prisma
+│   │       ├── wasm.d.ts
+│   │       └── wasm.js
+│   └── utils.ts
+├── next-env.d.ts
+├── next.config.mjs
+├── package.json
+├── pages
+│   └── api
+│       └── project.ts
+├── postcss.config.mjs
+├── prisma
+│   ├── dev.db
+│   ├── migrations
+│   │   ├── 20250507065556_add_task
+│   │   │   └── migration.sql
+│   │   ├── 20250507065948_add_task
+│   │   │   └── migration.sql
+│   │   ├── 20250507070342_setup_project
+│   │   │   └── migration.sql
+│   │   └── migration_lock.toml
+│   └── schema.prisma
+├── project-tree.txt
+├── README.md
+├── shared
+│   └── store.ts
+├── tailwind.config.ts
+├── tsconfig.json
+└── types
+    └── kanban.ts
+
+22 directories, 73 files

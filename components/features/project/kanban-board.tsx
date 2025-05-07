@@ -2,7 +2,7 @@
 // Intègre Zustand pour gérer le state global des boards et tâches
 
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   DndContext,
   closestCenter,
@@ -41,6 +41,11 @@ function SortableBoard({ board }: { board: SingleBoardProps }) {
 }
 export function KanbanBoardWithDndKit() {
   // Récupère boards et actions depuis le store Zustand
+  const fetchBoardsFromDb = useKanbanStore((state) => state.fetchBoardsFromDb);
+
+  useEffect(() => {
+    fetchBoardsFromDb();
+  }, []);
   const boards = useKanbanStore((state) => state.boards);
   const reorderBoards = useKanbanStore((state) => state.reorderBoards);
   const moveTask = useKanbanStore((state) => state.moveTask);
@@ -63,11 +68,11 @@ export function KanbanBoardWithDndKit() {
   function handleDragStart(event: DragStartEvent) {
     const { active } = event;
     const activeData = active.data.current;
-    
-    if (activeData?.type === 'task') {
+
+    if (activeData?.type === "task") {
       // Find which board this task belongs to
       for (const board of boards) {
-        if (board.tasks.some(task => task.id === active.id)) {
+        if (board.tasks.some((task) => task.id === active.id)) {
           setActiveBoard(board.name);
           break;
         }
@@ -81,40 +86,40 @@ export function KanbanBoardWithDndKit() {
 
     const activeId = active.id as string;
     const overId = over.id as string;
-    
+
     // Skip if same id
     if (activeId === overId) return;
-    
+
     const activeData = active.data.current;
     const overData = over.data.current;
-    
+
     // Only handle task dragging here
-    if (activeData?.type !== 'task') return;
-    
+    if (activeData?.type !== "task") return;
+
     // Find source board
-    const sourceBoard = boards.find(board => 
-      board.tasks.some(task => task.id === activeId)
+    const sourceBoard = boards.find((board) =>
+      board.tasks.some((task) => task.id === activeId)
     );
-    
+
     if (!sourceBoard) return;
-    
+
     // If hovering over a board or a task
     let targetBoardName = overId;
-    
+
     // If dropping over a task, get its board
-    if (overData?.type === 'task') {
+    if (overData?.type === "task") {
       // Find which board contains the target task
       for (const board of boards) {
-        if (board.tasks.some(task => task.id === overId)) {
+        if (board.tasks.some((task) => task.id === overId)) {
           targetBoardName = board.name;
           break;
         }
       }
     }
-    
+
     // Don't do anything if same board
     if (sourceBoard.name === targetBoardName) return;
-    
+
     // Move the task to the new board
     moveTask(activeId, sourceBoard.name, targetBoardName);
     setActiveBoard(targetBoardName);
@@ -123,12 +128,12 @@ export function KanbanBoardWithDndKit() {
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     setActiveBoard(null);
-    
+
     if (!over) return;
 
     const activeId = active.id as string;
     const overId = over.id as string;
-    
+
     // Skip if same id
     if (activeId === overId) return;
 
@@ -136,7 +141,7 @@ export function KanbanBoardWithDndKit() {
     const overData = over.data.current;
 
     // 1. Reordering boards (columns)
-    if (activeData?.type === 'board' && overData?.type === 'board') {
+    if (activeData?.type === "board" && overData?.type === "board") {
       const oldIndex = boards.findIndex((b) => b.name === activeId);
       const newIndex = boards.findIndex((b) => b.name === overId);
       if (oldIndex !== -1 && newIndex !== -1) {
@@ -147,24 +152,24 @@ export function KanbanBoardWithDndKit() {
 
     // 2. Task reordering within the same board or between boards
     // (Most task movement is handled in handleDragOver for better UX)
-    if (activeData?.type === 'task') {
-      const sourceBoard = boards.find(board => 
-        board.tasks.some(task => task.id === activeId)
+    if (activeData?.type === "task") {
+      const sourceBoard = boards.find((board) =>
+        board.tasks.some((task) => task.id === activeId)
       );
-      
+
       if (sourceBoard) {
         let targetBoardName = overId;
-        
-        if (overData?.type === 'task') {
+
+        if (overData?.type === "task") {
           // Find which board contains the target task
           for (const board of boards) {
-            if (board.tasks.some(task => task.id === overId)) {
+            if (board.tasks.some((task) => task.id === overId)) {
               targetBoardName = board.name;
               break;
             }
           }
         }
-        
+
         // Only move if not already moved in dragOver
         if (sourceBoard.name !== targetBoardName) {
           moveTask(activeId, sourceBoard.name, targetBoardName);
@@ -192,10 +197,7 @@ export function KanbanBoardWithDndKit() {
       >
         <div className="flex gap-3 overflow-x-scroll mt-3 no-scrollbar p-2">
           {boards.map((board) => (
-            <SortableBoard 
-              key={board.name} 
-              board={board} 
-            />
+            <SortableBoard key={board.name} board={board} />
           ))}
         </div>
       </SortableContext>

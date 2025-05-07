@@ -2,7 +2,8 @@
 import { Board, ITask } from "@/types/kanban";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-
+import { fetchBoards } from "@/lib/api";
+import { Project } from "@/lib/generated/prisma";
 // Interface du state et des actions
 interface KanbanState {
     boards: Board[];
@@ -14,20 +15,26 @@ interface KanbanState {
     addTask: (boardName: string, task: ITask) => void;
     // action pour mettre à jour une tâche
     updateTask: (updatedTask: ITask, boardName: string) => void;
+    fetchBoardsFromDb: () => Promise<void>;
 }
 
 // Création du store avec middleware devtools
 export const useKanbanStore = create<KanbanState>()(
     devtools((set, get) => ({
         // État initial des boards (sans tâches)
-        boards: [
-            { name: "Backlog", createdAt: new Date(), tasks: [] },
-            { name: "Planning", createdAt: new Date(), tasks: [], color: "blue" },
-            { name: "In Progress", createdAt: new Date(), tasks: [], color: "yellow" },
-            { name: "Paused", createdAt: new Date(), tasks: [], color: "purple" },
-            { name: "Done", createdAt: new Date(), tasks: [], color: "green" },
-            { name: "Canceled", createdAt: new Date(), tasks: [], color: "red" },
-        ],
+        boards: [],
+        fetchBoardsFromDb: async () => {
+            const data = await fetchBoards();
+            const formatted = data.map((p: Board) => ({
+                name: p.name,
+                createdAt: new Date(p.createdAt),
+                color: p.color,
+                tasks: p.tasks
+                
+            }));
+            set({ boards: formatted });
+            console.log("Fetched boards from DB:", formatted);
+        },
 
         // Réordonner les colonnes
         reorderBoards: (from, to) =>
@@ -43,32 +50,32 @@ export const useKanbanStore = create<KanbanState>()(
             set((state) => {
                 // Si même board, ne rien faire
                 if (fromBoard === toBoard) return state;
-                
+
                 const boardsCopy: Board[] = JSON.parse(JSON.stringify(state.boards));
-                
+
                 const sourceIndex = boardsCopy.findIndex((b) => b.name === fromBoard);
                 const targetIndex = boardsCopy.findIndex((b) => b.name === toBoard);
-                
+
                 if (sourceIndex === -1 || targetIndex === -1) return state;
-                
+
                 const source = boardsCopy[sourceIndex];
                 const target = boardsCopy[targetIndex];
-                
+
                 // Trouver l'index de la tâche à déplacer
                 const taskIndex = source.tasks.findIndex((t) => t.id === taskId);
                 if (taskIndex === -1) return state;
-                
+
                 // Copier la tâche et ajuster son projectName pour correspondre au board cible
-                const taskToMove = {...source.tasks[taskIndex]};
+                const taskToMove = { ...source.tasks[taskIndex] };
                 taskToMove.projectName = toBoard;
                 taskToMove.color = boardsCopy[targetIndex].color;
-                
+
                 // Retirer la tâche du board source
                 source.tasks.splice(taskIndex, 1);
-                
+
                 // Ajouter la tâche au board cible
                 target.tasks.push(taskToMove);
-                
+
                 return { boards: boardsCopy };
             }, false, "moveTask"),
 
@@ -79,7 +86,7 @@ export const useKanbanStore = create<KanbanState>()(
                     b.name === boardName ? { ...b, tasks: [...b.tasks, task] } : b
                 ),
             }), false, "addTask"),
-            
+
         // Mettre à jour une tâche existante
         updateTask: (updatedTask, boardName) =>
             set((state) => ({
