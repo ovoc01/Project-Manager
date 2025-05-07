@@ -31,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           id: project.id.toString(),
           label: project.label,
           color: project.color as keyof typeof KANBAN_VARIANT,
-          projectName: project.label,
+          projectName: status,
           isEdited: false,
           duration: 0
         }

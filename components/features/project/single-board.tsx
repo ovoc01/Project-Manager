@@ -69,12 +69,12 @@ export function SingleBoard({
   const variantClass = KANBAN_VARIANT[color] ?? KANBAN_VARIANT.gray;
 
   // Définir la zone droppable pour les tâches de cette colonne
-  const { setNodeRef: setDroppableRef } = useDroppable({ 
+  const { setNodeRef: setDroppableRef } = useDroppable({
     id: name,
     data: {
-      type: 'board',
-      name
-    }
+      type: "board",
+      name,
+    },
   });
 
   const addTask = useKanbanStore((state) => state.addTask);
@@ -104,13 +104,15 @@ export function SingleBoard({
           className="flex justify-between items-center px-3 cursor-grab"
         >
           <div
-            className={`flex items-center ${variantClass.cover} rounded-xl px-2 py-1 gap-1`}
+            className={`flex items-center ${variantClass.cover} rounded-xl px-2  gap-1`}
           >
             <span className={`w-2 h-2 rounded-full ${variantClass.dot}`}></span>
-            <h2 className={`font-semibold text-sm ${variantClass.text}`}>
+            <h2 className={`font-semibold text-xs ${variantClass.text}`}>
               {name}
             </h2>
-            <span className="text-xs text-gray-500 ml-1">{tasks.length}</span>
+            <span className={`text-xs font-semibold ${variantClass.text} ml-1`}>
+              {tasks.length}
+            </span>
           </div>
           <div className="flex items-center gap-1">
             <Button variant="ghost" size="icon">
