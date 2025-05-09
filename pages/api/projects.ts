@@ -6,6 +6,15 @@ import { KANBAN_VARIANT } from "@/components/features/project/single-board";
 const prisma = new PrismaClient();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method === 'GET') {
+    await GET(req, res)
+  }
+  else if (req.method === 'POST') {
+    await POST(req, res)
+  }
+}
+
+async function GET(req: NextApiRequest, res: NextApiResponse) {
   // Définir les boards avec noms, couleurs, etc.
   const boards: Board[] = [
     { name: "Backlog", color: "gray", createdAt: new Date(), tasks: [] },
@@ -14,7 +23,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     { name: "Paused", color: "purple", createdAt: new Date(), tasks: [] },
     { name: "Done", color: "green", createdAt: new Date(), tasks: [] },
     { name: "Cancelled", color: "red", createdAt: new Date(), tasks: [] },
-
   ];
 
   try {
@@ -46,6 +54,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(200).json(boards);
   } catch (error) {
     console.error("Erreur lors de la récupération des projets:", error);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+}
+
+async function POST(req: NextApiRequest, res: NextApiResponse) {
+  try {
+    const { id, projectName, isEdited, ...task } = req.body.task
+    console.log(`This is the request body ${JSON.stringify(task)}`)
+    await prisma.project.create({
+      data: task
+    })
+
+    res.status(201).json("Task Created")
+  } catch (error) {
+    console.error("Erreur lors de la création des projets:", error);
     res.status(500).json({ message: "Erreur serveur" });
   }
 }

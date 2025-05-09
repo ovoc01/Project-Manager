@@ -2,7 +2,7 @@
 import { Board, ITask } from "@/types/kanban";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { fetchBoards } from "@/lib/api";
+import { addProjectToBoard, fetchBoards } from "@/lib/api";
 import { Project } from "@/lib/generated/prisma";
 // Interface du state et des actions
 interface KanbanState {
@@ -12,7 +12,7 @@ interface KanbanState {
     // action pour déplacer une tâche d'une colonne à une autre
     moveTask: (taskId: string, fromBoard: string, toBoard: string) => void;
     // action pour ajouter une tâche
-    addTask: (boardName: string, task: ITask) => void;
+    addTask: (boardName: string, task: ITask) => Promise<void>;
     // action pour mettre à jour une tâche
     updateTask: (updatedTask: ITask, boardName: string) => void;
     fetchBoardsFromDb: () => Promise<void>;
@@ -30,7 +30,7 @@ export const useKanbanStore = create<KanbanState>()(
                 createdAt: new Date(p.createdAt),
                 color: p.color,
                 tasks: p.tasks
-                
+
             }));
             set({ boards: formatted });
             console.log("Fetched boards from DB:", formatted);
@@ -80,12 +80,14 @@ export const useKanbanStore = create<KanbanState>()(
             }, false, "moveTask"),
 
         // Ajouter une nouvelle tâche
-        addTask: (boardName, task) =>
+        addTask: async (boardName, task) => {
             set((state) => ({
                 boards: state.boards.map((b) =>
-                    b.name === boardName ? { ...b, tasks: [...b.tasks, task] } : b
+                    b.name.toLowerCase() === boardName.toLowerCase() ? { ...b, tasks: [...b.tasks, task] } : b
                 ),
-            }), false, "addTask"),
+            }), false, "addTask")
+            await addProjectToBoard(task)
+        },
 
         // Mettre à jour une tâche existante
         updateTask: (updatedTask, boardName) =>
