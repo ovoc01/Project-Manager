@@ -294,7 +294,122 @@ const ProjectCommentsSection: React.FC<ProjectCommentsSectionProps> = ({
 );
 
 
-export function ProjectSheet() {
+interface ProjectSheetProps {
+    defaultValues?: {
+        projectName?: string;
+        projectStatus?: string;
+        details?: Partial<ProjectFormParams>;
+    };
+    onSave?: (data: {
+        projectName: string;
+        projectStatus: string;
+        details: ProjectFormParams;
+    }) => void;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+}
+interface SheetTriggerProps {
+    children: React.ReactNode;
+}
+
+
+
+export function ProjectSheet({
+    defaultValues,
+    onSave,
+    open,
+    onOpenChange
+}: ProjectSheetProps) {
+    const [projectName, setProjectName] = useState(defaultValues?.projectName || "");
+    const [projectStatus, setProjectStatus] = useState(defaultValues?.projectStatus || "Backlog");
+    const [projectDetails, setProjectDetails] = useState<ProjectFormParams>({
+        date: defaultValues?.details?.date || "",
+        priority: defaultValues?.details?.priority || "",
+        isBlocking: defaultValues?.details?.isBlocking || "",
+        duration: defaultValues?.details?.duration || 0,
+    });
+    const [currentComment, setCurrentComment] = useState("");
+
+    const addTask = useKanbanStore((state) => state.addTask);
+
+    const resetForm = () => {
+        setProjectName(defaultValues?.projectName || "");
+        setProjectStatus(defaultValues?.projectStatus || "Backlog");
+        setProjectDetails({
+            date: defaultValues?.details?.date || "",
+            priority: defaultValues?.details?.priority || "",
+            isBlocking: defaultValues?.details?.isBlocking || "",
+            duration: defaultValues?.details?.duration || 0,
+        });
+        setCurrentComment("");
+    };
+
+    const handleOpenChange = async (isOpen: boolean) => {
+        if (onOpenChange) {
+            onOpenChange(isOpen);
+        }
+
+        if (!isOpen && projectName.trim() !== "") {
+            const task: ITask = {
+                id: Date.now().toString(),
+                label: projectName.trim(),
+                color: PROJECT_BOARDS.find(b => b.name === projectStatus)?.color || "gray",
+                projectName: projectStatus,
+                isEdited: false,
+                duration: projectDetails.duration,
+            };
+
+            if (onSave) {
+                onSave({
+                    projectName: projectName.trim(),
+                    projectStatus,
+                    details: projectDetails
+                });
+            } else {
+                await addTask(projectStatus, task);
+            }
+            resetForm();
+        } else if (!isOpen) {
+            resetForm();
+        }
+    };
+
+    const handleDetailChange = (field: keyof ProjectFormParams, value: string | number) => {
+        setProjectDetails(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleSendComment = () => {
+        if (currentComment.trim()) {
+            console.log("Sending comment:", currentComment);
+            setCurrentComment("");
+        }
+    };
+
+    return (
+        <Sheet open={open} onOpenChange={handleOpenChange}>
+
+            <SheetContent className="min-w-[700px] p-10 sm:p-20 overflow-y-auto">
+                <SheetHeader>
+                    <SheetTitle className="text-3xl text-gray-300 font-bold">
+                        <ProjectTitleEditor value={projectName} onChange={setProjectName} />
+                    </SheetTitle>
+                    <ProjectMetaFields selectedStatus={projectStatus} onStatusSelect={setProjectStatus} />
+                </SheetHeader>
+                <div className="mt-5 flex gap-4 flex-col">
+                    <ProjectDetailProperties details={projectDetails} onDetailChange={handleDetailChange} />
+                    <ProjectCommentsSection
+                        commentInput={currentComment}
+                        onCommentInputChange={setCurrentComment}
+                        onSendComment={handleSendComment}
+                        isCommentSendable={currentComment.trim().length > 0}
+                    />
+                </div>
+            </SheetContent>
+        </Sheet>
+    );
+}
+
+export function ProjectSheet1() {
     const [projectName, setProjectName] = useState("");
     const [projectStatus, setProjectStatus] = useState("Backlog");
     const [projectDetails, setProjectDetails] = useState<ProjectFormParams>({
